@@ -12,7 +12,11 @@ message Slice {
 
 message Document {
   string sourceInfoUrl = 1;
-  reserved 2 to 10;
+  string sourceInfoName = 2;
+  string generatorInfoName = 3;
+  string generatorInfoUrl = 4;
+
+  reserved 5 to 10;
 
   repeated Channel channels = 12;
 

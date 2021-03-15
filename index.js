@@ -1,8 +1,9 @@
-const { Document } = require('mediaxml/xmltv')
+const { createNode } = require('mediaxml/document')
 const hyperswarm = require('hyperswarm')
 const { fetch } = require('mediaxml/fetch')
 const hypercore = require('hypercore')
 const messages = require('./messages')
+const xmltv = require('mediaxml/xmltv')
 const pump = require('pump')
 const ram = require('random-access-memory')
 
@@ -81,27 +82,32 @@ class Feed {
     })
   }
 
-  async sync() {
-    if (this.feed.writable) {
+  async save(document) {
+    const { programmes } = document
+    const header = messages.Header.encode({
+      document,
+      programmes: {
+        start: this.feed.length,
+        stop: this.feed.length + programmes.length
+      }
+    })
+
+    const payload = programmes
+      .map((programme) => messages.Document.Programme.encode(programme))
+      .concat(header)
+
+    await makePromiseCallback((cb) => this.feed.append(payload, cb))
+
+    return document
+  }
+
+  async sync(callback) {
+    if (this.feed.writable && this.uri) {
       const stream = await fetch(this.uri)
-      const document = Document.from(stream)
+      const document = xmltv.Document.from(stream)
 
       await document.ready()
-
-      const { programmes } = document
-      const header = messages.Header.encode({
-        document,
-        programmes: {
-          start: this.feed.length,
-          stop: this.feed.length + programmes.length
-        }
-      })
-
-      const payload = programmes
-        .map((programme) => messages.Document.Programme.encode(programme))
-        .concat(header)
-
-      await makePromiseCallback((cb) => this.feed.append(payload, cb))
+      await this.save(document)
     }
 
     const head = await makePromiseCallback((cb) => {
@@ -112,17 +118,29 @@ class Feed {
       }
     })
 
-    const header = messages.Header.decode(head)
-    const { document } = header
-    const programmes = await makePromiseCallback((cb) => {
+    if (head) {
+      const header = messages.Header.decode(head)
+      const { document } = header
       const { start, stop } = header.programmes
-      const valueEncoding = messages.Document.Programme
-      this.feed.getBatch(start, stop, { valueEncoding }, cb)
-    })
 
-    document.programmes = programmes
+      if (start || stop) {
+        document.programmes = await makePromiseCallback((cb) => {
+          const valueEncoding = messages.Document.Programme
+          this.feed.getBatch(start, stop, { valueEncoding }, cb)
+        })
 
-    return document
+        if ('function' === typeof callback) {
+          process.nextTick(callback, document)
+        }
+
+        return document
+      }
+    }
+
+    if ('function' === typeof callback) {
+      process.nextTick(callback, null)
+    }
+    return null
   }
 }
 
@@ -130,6 +148,13 @@ function createFeed(...args) {
   return Feed.from(...args)
 }
 
+function createDocument(...args) {
+  return xmltv.createDocument(null, ...args)
+}
+
 module.exports = Object.assign(createFeed, {
+  createDocument,
+  createNode,
+  createFeed,
   Feed
 })

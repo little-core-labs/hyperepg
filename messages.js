@@ -1564,6 +1564,18 @@ function defineDocument () {
       var len = encodings.string.encodingLength(obj.sourceInfoUrl)
       length += 1 + len
     }
+    if (defined(obj.sourceInfoName)) {
+      var len = encodings.string.encodingLength(obj.sourceInfoName)
+      length += 1 + len
+    }
+    if (defined(obj.generatorInfoName)) {
+      var len = encodings.string.encodingLength(obj.generatorInfoName)
+      length += 1 + len
+    }
+    if (defined(obj.generatorInfoUrl)) {
+      var len = encodings.string.encodingLength(obj.generatorInfoUrl)
+      length += 1 + len
+    }
     if (defined(obj.channels)) {
       for (var i = 0; i < obj.channels.length; i++) {
         if (!defined(obj.channels[i])) continue
@@ -1582,6 +1594,21 @@ function defineDocument () {
     if (defined(obj.sourceInfoUrl)) {
       buf[offset++] = 10
       encodings.string.encode(obj.sourceInfoUrl, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.sourceInfoName)) {
+      buf[offset++] = 18
+      encodings.string.encode(obj.sourceInfoName, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.generatorInfoName)) {
+      buf[offset++] = 26
+      encodings.string.encode(obj.generatorInfoName, buf, offset)
+      offset += encodings.string.encode.bytes
+    }
+    if (defined(obj.generatorInfoUrl)) {
+      buf[offset++] = 34
+      encodings.string.encode(obj.generatorInfoUrl, buf, offset)
       offset += encodings.string.encode.bytes
     }
     if (defined(obj.channels)) {
@@ -1605,6 +1632,9 @@ function defineDocument () {
     var oldOffset = offset
     var obj = {
       sourceInfoUrl: "",
+      sourceInfoName: "",
+      generatorInfoName: "",
+      generatorInfoUrl: "",
       channels: []
     }
     while (true) {
@@ -1618,6 +1648,18 @@ function defineDocument () {
       switch (tag) {
         case 1:
         obj.sourceInfoUrl = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 2:
+        obj.sourceInfoName = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 3:
+        obj.generatorInfoName = encodings.string.decode(buf, offset)
+        offset += encodings.string.decode.bytes
+        break
+        case 4:
+        obj.generatorInfoUrl = encodings.string.decode(buf, offset)
         offset += encodings.string.decode.bytes
         break
         case 12:
