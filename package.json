@@ -1,0 +1,29 @@
+{
+  "name": "hyperepg",
+  "version": "0.0.0",
+  "description": "EPG (XMLTV) data distributed over a Hypercore Feed.",
+  "main": "index.js",
+  "scripts": {
+    "build:messages": "protocol-buffers schema.proto -o messages.js",
+    "test": "tape test.js"
+  },
+  "keywords": [
+    "hypercore",
+    "epg",
+    "xmltv",
+    "tv",
+    "program",
+    "programme",
+    "guide"
+  ],
+  "author": "Joseph Werle <werle@littlstar.com>",
+  "license": "MIT",
+  "dependencies": {
+    "hypercore": "^9.9.1",
+    "hyperswarm": "^2.15.3",
+    "mediaxml": "^0.5.2",
+    "protocol-buffers": "^4.2.0",
+    "pump": "^3.0.0",
+    "random-access-memory": "^3.1.2"
+  }
+}
