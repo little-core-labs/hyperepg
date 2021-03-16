@@ -1,6 +1,6 @@
 {
   "name": "hyperepg",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "EPG (XMLTV) data distributed over a Hypercore Feed.",
   "main": "index.js",
   "scripts": {
